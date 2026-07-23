@@ -14,7 +14,8 @@ agents:
     description: A general-purpose chat agent that answers questions, explains concepts, and helps with tasks.
     instructions: crew/agents/demo-assistant.md
     modelTier: fast
-    allowedTools: []
+    allowedTools:
+      - code.read
     triggers:
       - help me with
       - explain

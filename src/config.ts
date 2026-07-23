@@ -11,7 +11,7 @@ dotenvLoad({ override: true });
 const envSchema = z.object({
   // LLM endpoint — any OpenAI-compatible API. Set these and you're done.
   // Falls back to PROXY_* for backward compat with Ben's existing setup.
-  OPENAI_BASE_URL: z.string().url().optional().default(''),
+  OPENAI_BASE_URL: z.string().url().optional().or(z.literal('')).default(''),
   OPENAI_API_KEY: z.string().optional().default(''),
   // Legacy proxy vars — used only when OPENAI_* is not set.
   PROXY_BASE_URL: z.string().url().default('http://127.0.0.1:8317/v1'),
