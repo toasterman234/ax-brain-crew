@@ -1,0 +1,12 @@
+{
+  "flowId": "defrag",
+  "description": "Eval cases for Weekly Defragmentation flow",
+  "cases": [
+    {
+      "id": "df-01",
+      "input": { "userRequest": "defrag my vault" },
+      "expected": { "reportWritten": true },
+      "metric": "function score(output, expected) {\n  const o = output?.output ?? {};\n  if (!o.reportWritten && !o.reportPath) return 0;\n  if (o.warnings?.length > 0 && o.response) return 1.0;\n  return 0.5;\n}"
+    }
+  ]
+}

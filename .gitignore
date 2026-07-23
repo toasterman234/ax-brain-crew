@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
+
+# Backup files
+*.bak
+
+# Local data + secrets
+data/
+.env
+.env.bak-*
+*.log
+
+# OS junk
+.DS_Store
+__pycache__/
+
+# IDE / AI
+.claude/
+.pi/
+.pi-subagents/
+.planning/
+
+# Retired root scratchpads (see vault/AGENTS.md)
+findings.md
+progress.md
+task_plan.md
+
+# Personal vault — excluded. Use demo-vault/ or set OBSIDIAN_VAULT_PATH
+vault/
+
+# Personal agent files — excluded from public repo
+crew/agents/architect.md
+crew/agents/conductor.md
+crew/agents/connector.md
+crew/agents/eval-proposer.md
+crew/agents/investigator.md
+crew/agents/librarian.md
+crew/agents/scout.md
+crew/agents/scribe.md
+crew/agents/seeker.md
+crew/agents/session-miner.md
+crew/agents/sorter.md
+crew/registry.yaml
+crew/skills.yaml
+crew/skills/
+crew/references/
+
+# Personal config — Slack channel mappings
+config/
+
+# Bridge — Ben's Slack integration
+src/bridge/
+
+# Personal evals + operational scripts
+scripts/
+
+# Unrelated projects in this directory
+curbcritic-frontend/
+flowable-8.0.0/
+Plans/
+vault-merge-plan.md
+zillow-refs/
+smm_screener.py
+
+# Tests that reference Ben's private vault fixtures
+tests/fixtures/*-vault/
+tests/integration/
+tests/bridge-*.test.ts

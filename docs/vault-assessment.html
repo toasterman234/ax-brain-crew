@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ax Brain Crew — Vault Assessment: Vault-v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0d0d12;
+    color: #e0e0e8;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  .header { padding: 48px 0 32px; border-bottom: 1px solid #1e1e2e; margin-bottom: 40px; }
+  .header h1 { font-size: 2.4rem; font-weight: 700; color: #f0f0f8; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .header .subtitle { font-size: 1rem; color: #8888a0; margin-bottom: 12px; }
+  .header .meta { color: #6b6b80; font-size: 0.9rem; display: flex; gap: 24px; flex-wrap: wrap; }
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot.green { background: #4ade80; }
+  .dot.amber { background: #fbbf24; }
+  .dot.blue { background: #60a5fa; }
+  .dot.purple { background: #c084fc; }
+
+  .verdict {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2e2e4e;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 40px;
+  }
+  .verdict .score-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .verdict .score-card {
+    text-align: center;
+    padding: 18px 12px;
+    background: #0f0f1a;
+    border-radius: 8px;
+  }
+  .verdict .score-card .number { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+  .verdict .score-card .label { font-size: 0.78rem; color: #8888a0; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+  .number.green { color: #4ade80; }
+  .number.amber { color: #fbbf24; }
+  .number.blue { color: #60a5fa; }
+  .number.purple { color: #c084fc; }
+
+  .section { margin-bottom: 40px; }
+  .section h2 { font-size: 1.3rem; font-weight: 600; color: #c0c0d8; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #1e1e2e; display: flex; align-items: center; gap: 10px; }
+  .section h2 .icon { font-size: 1.1rem; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat { background: #14141e; border: 1px solid #1e1e2e; border-radius: 8px; padding: 14px 16px; }
+  .stat .stat-value { font-size: 1.6rem; font-weight: 700; color: #f0f0f8; }
+  .stat .stat-label { font-size: 0.75rem; color: #6b6b80; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  thead th { text-align: left; padding: 10px 14px; color: #6b6b80; font-weight: 500; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; border-bottom: 1px solid #1e1e2e; }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid #111118; vertical-align: top; }
+  tbody tr:hover { background: #161622; }
+
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .bar-label { width: 160px; font-size: 0.85rem; color: #a0a0b8; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 8px; background: #1a1a28; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .bar-fill.excellent { background: linear-gradient(90deg, #4ade80, #22d3a0); }
+  .bar-fill.good { background: linear-gradient(90deg, #60a5fa, #818cf8); }
+  .bar-fill.ok { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+  .bar-fill.low { background: linear-gradient(90deg, #f87171, #ef4444); }
+  .bar-value { width: 36px; font-size: 0.8rem; font-weight: 600; color: #c0c0d8; flex-shrink: 0; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin: 2px 4px 2px 0; }
+  .tag.positive { background: #064e3b; color: #4ade80; }
+  .tag.warning { background: #78350f; color: #fbbf24; }
+  .tag.danger { background: #7f1d1d; color: #f87171; }
+  .tag.info { background: #1e3a5f; color: #60a5fa; }
+
+  ul.list { list-style: none; }
+  ul.list li { padding: 8px 0; border-bottom: 1px solid #161622; display: flex; align-items: flex-start; gap: 10px; }
+  ul.list li:last-child { border-bottom: none; }
+  ul.list .bullet { color: #60a5fa; font-weight: bold; flex-shrink: 0; }
+  ul.list .bullet.warn { color: #fbbf24; }
+  ul.list .bullet.bad { color: #f87171; }
+
+  .notable-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .notable-card { background: #14141e; border: 1px solid #1e1e2e; border-radius: 8px; padding: 16px; }
+  .notable-card .note-path { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #60a5fa; margin-bottom: 8px; }
+  .notable-card .note-reason { font-size: 0.85rem; color: #a0a0b8; line-height: 1.5; }
+
+  .theme-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .theme-chip { padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+  .theme-chip.primary { background: #1e3a5f; color: #60a5fa; }
+  .theme-chip.secondary { background: #1a1a2e; color: #818cf8; }
+  .theme-chip.tertiary { background: #18181b; color: #a1a1aa; }
+
+  .folder-map { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.7; background: #0a0a10; border: 1px solid #1e1e2e; border-radius: 8px; padding: 20px 24px; color: #8899aa; }
+  .folder-map .dir { color: #60a5fa; }
+  .folder-map .file { color: #a0a0b8; }
+  .folder-map .count { color: #6b6b80; }
+  .folder-map .empty { color: #4a4a5a; font-style: italic; }
+  .folder-map .root { color: #c084fc; }
+  .folder-map .archive { color: #7878a0; }
+
+  .pullquote {
+    background: #1a1a2e;
+    border-left: 3px solid #c084fc;
+    padding: 16px 20px;
+    margin: 16px 0;
+    border-radius: 0 8px 8px 0;
+    color: #c0c0d8;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .scorecard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+  .scorecard { background: #14141e; border: 1px solid #1e1e2e; border-radius: 8px; padding: 18px; display: flex; align-items: center; gap: 14px; }
+  .scorecard .stars { font-size: 1.2rem; color: #fbbf24; letter-spacing: 2px; flex-shrink: 0; width: 100px; }
+  .scorecard .info .sc-label { font-weight: 600; color: #d0d0e0; font-size: 0.9rem; }
+  .scorecard .info .sc-detail { font-size: 0.8rem; color: #8888a0; margin-top: 2px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .rule-box {
+    background: #0a0a10;
+    border: 1px solid #1e1e2e;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+  .rule-box .rule-title { font-weight: 600; color: #c084fc; margin-bottom: 4px; font-size: 0.9rem; }
+  .rule-box .rule-desc { font-size: 0.85rem; color: #a0a0b8; }
+
+  @media (max-width: 640px) {
+    .header h1 { font-size: 1.6rem; }
+    .verdict .score-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+  <h1>📁 Vault-v2 — Full Assessment</h1>
+  <div class="subtitle">Ben's active personal vault — Johnny-Decimal + PARA, 5 domain hubs, ~2,888 notes</div>
+  <div class="meta">
+    <span><span class="dot green"></span> Assessed 2026-07-19</span>
+    <span><span class="dot blue"></span> /Volumes/Extra Storage…/obsidian-vault/Vault-v2</span>
+    <span><span class="dot purple"></span> ~2,888 .md files</span>
+    <span><span class="dot amber"></span> Human-first, not AI-first</span>
+  </div>
+</div>
+
+<!-- Score Banner -->
+<div class="verdict">
+  <div class="score-row">
+    <div class="score-card">
+      <div class="number green">82</div>
+      <div class="label">Overall Health</div>
+    </div>
+    <div class="score-card">
+      <div class="number blue">90</div>
+      <div class="label">Prose Quality</div>
+    </div>
+    <div class="score-card">
+      <div class="number purple">2,888</div>
+      <div class="label">Total Notes</div>
+    </div>
+    <div class="score-card">
+      <div class="number amber">557</div>
+      <div class="label">Active Core</div>
+    </div>
+  </div>
+  <p style="color:#a0a0b8; font-size:0.95rem; line-height:1.6; margin-top:8px;">
+    Ben Charney's active personal knowledge base. Johnny-Decimal numbered folders over a PARA skeleton,
+    5 domain hubs with standardized templates, extensive wikilink graph, and nightly conformance automation.
+    The prose quality is exceptional — honest, self-aware, structured around compounding ledgers.
+    Main weakness is frontmatter consistency: only 41% of notes have a <code>type:</code> field.
+  </p>
+</div>
+
+<!-- Quality Bars -->
+<div class="section">
+  <h2><span class="icon">📊</span> Quality Dimensions</h2>
+  <div class="bar-row">
+    <div class="bar-label">Structure</div>
+    <div class="bar-track"><div class="bar-fill excellent" style="width:85%"></div></div>
+    <div class="bar-value">8.5</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Prose Quality</div>
+    <div class="bar-track"><div class="bar-fill excellent" style="width:90%"></div></div>
+    <div class="bar-value">9.0</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Linking</div>
+    <div class="bar-track"><div class="bar-fill good" style="width:78%"></div></div>
+    <div class="bar-value">7.8</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Frontmatter</div>
+    <div class="bar-track"><div class="bar-fill ok" style="width:58%"></div></div>
+    <div class="bar-value">5.8</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">AI-Friendliness</div>
+    <div class="bar-track"><div class="bar-fill good" style="width:62%"></div></div>
+    <div class="bar-value">6.2</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Maintenance</div>
+    <div class="bar-track"><div class="bar-fill good" style="width:80%"></div></div>
+    <div class="bar-value">8.0</div>
+  </div>
+</div>
+
+<!-- Scorecard -->
+<div class="section">
+  <h2><span class="icon">⭐</span> Dimensional Scorecard</h2>
+  <div class="scorecard-grid">
+    <div class="scorecard">
+      <div class="stars">★★★★☆</div>
+      <div class="info"><div class="sc-label">Structure</div><div class="sc-detail">Strong Johnny-Decimal+PARA hybrid. Archive skeleton mostly empty.</div></div>
+    </div>
+    <div class="scorecard">
+      <div class="stars">★★★★★</div>
+      <div class="info"><div class="sc-label">Prose Quality</div><div class="sc-detail">Exceptional — honest, structured, self-aware compounding ledgers.</div></div>
+    </div>
+    <div class="scorecard">
+      <div class="stars">★★★☆☆</div>
+      <div class="info"><div class="sc-label">Frontmatter</div><div class="sc-detail">95% have frontmatter, but only 41% have type:. 27 non-canonical types.</div></div>
+    </div>
+    <div class="scorecard">
+      <div class="stars">★★★★☆</div>
+      <div class="info"><div class="sc-label">Linking</div><div class="sc-detail">Heavy wikilink use, domain up-links, Dataview. 74 orphans remain.</div></div>
+    </div>
+    <div class="scorecard">
+      <div class="stars">★★★☆☆</div>
+      <div class="info"><div class="sc-label">AI-Friendliness</div><div class="sc-detail">No AGENTS.md. Well-documented externally. Needs agent entry point.</div></div>
+    </div>
+    <div class="scorecard">
+      <div class="stars">★★★★☆</div>
+      <div class="info"><div class="sc-label">Automation</div><div class="sc-detail">Nightly conformance checks, root sweep, git commit. Some jobs unloaded.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Vault Structure -->
+<div class="section">
+  <h2><span class="icon">🗂️</span> Vault Structure — Johnny-Decimal + PARA</h2>
+  <div style="margin-bottom:16px;">
+    <span class="tag positive">Human-First</span>
+    <span class="tag info">Johnny-Decimal</span>
+    <span class="tag info">PARA Semantics</span>
+    <span class="tag info">5 Domain Hubs</span>
+    <span class="tag info">13 Note Types</span>
+  </div>
+
+  <div class="folder-map">
+    <span class="dir">Vault-v2/</span><br>
+    &nbsp;&nbsp;<span class="root">_Vault Guide.md</span>           <span class="count">← primary routing + conventions document</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">00 Home/</span>                  <span class="count">(8 files) — front door</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="root">Home.md</span>     <span class="count">landing page</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">🧭 Life Direction.md</span> <span class="count">theme MOC — compounding ledger</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">🧭 Money, Business &amp; Ideas.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">🧭 Mind &amp; Self.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">🧭 Father &amp; Family.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">🧭 AI System — What I Want Built.md</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">01 Inbox/</span>                 <span class="count">(15 notes) — raw capture buffer, no frontmatter</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">10 Projects/</span>              <span class="count">(126 files, 7 active) — P = Projects</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Daily Report/</span> <span class="count">daily reports + archive</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Daemon Site/</span> <span class="count">personal website content</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Koerner Research/</span> <span class="count">business due diligence</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Life-OS Knowledge Graph/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Health Tracking/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Memphis Service Business Analysis/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Unethical Money Catalog/</span> <span class="count">★ best-written project note</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">20 Areas/</span>                 <span class="count">(929 files) — A = Areas, 5 domain hubs + journal</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Health/</span>      <span class="count">hub + daily log (Jun–Jul 2026) + medical records</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Mind/</span>        <span class="count">hub + mental health notes</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Family &amp; People/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Self &amp; Direction/</span> <span class="count">Telos system, Discovery sessions</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Work &amp; Money/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Journal/</span>      <span class="count">Things Logbook (~500 entries, 2023–2026)</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">30 Resources/</span>             <span class="count">(294 files) — R = Resources</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Template/</span>    <span class="count">13 templates (Domain Hub, Project Hub, etc.)</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Agent-Config/</span> <span class="count">About Ben, Rules for agents, Interaction Style</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Trading/</span>     <span class="count">quant research + options wheel</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Naval Archive/</span> <span class="count">~200 captured blog posts</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">90 System/</span>                <span class="count">(54 files) — vault infrastructure</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Conformance/Conformance Report.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">AI-System/Pattern Library/</span> <span class="count">15 reusable agent patterns</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Decisions/</span>    <span class="count">12+ ADRs, immutable</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">99 Archive/</span>               <span class="empty">(2 files — nearly empty)</span><br>
+  </div>
+</div>
+
+<!-- Content Themes -->
+<div class="section">
+  <h2><span class="icon">🎯</span> Content Themes</h2>
+
+  <div class="theme-chips">
+    <span class="theme-chip primary">Trading &amp; Money</span>
+    <span class="theme-chip primary">AI / Agent System Design</span>
+    <span class="theme-chip secondary">Personal Life-OS</span>
+    <span class="theme-chip secondary">Self &amp; Direction</span>
+    <span class="theme-chip secondary">Journal / Things Logbook</span>
+    <span class="theme-chip secondary">Health Tracking</span>
+    <span class="theme-chip secondary">Family &amp; People</span>
+    <span class="theme-chip tertiary">Naval Archive</span>
+    <span class="theme-chip tertiary">Daemon Site</span>
+    <span class="theme-chip tertiary">Meta-Vault Infra</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Domain</th><th>Key Topics</th><th>Volume</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="color:#60a5fa;font-weight:600;">Trading &amp; Money</td>
+        <td>Options wheel strategy, R1–R11 ruleset, Market Lake API, QuantConnect, Schwab brokerage, Unethical Money Catalog research, Memphis service business analysis, Koerner due diligence</td>
+        <td style="color:#a0a0b8;">~100+</td>
+      </tr>
+      <tr>
+        <td style="color:#818cf8;font-weight:600;">AI / Agent System</td>
+        <td>15 Pattern Library entries (Agent Orchestrator, Gated Optimization, PA Persona, etc.), Control Surface Inventory, fabro/pi/agent-runner docs, vLLM Semantic Router, agent history</td>
+        <td style="color:#a0a0b8;">~80+</td>
+      </tr>
+      <tr>
+        <td style="color:#a0a0b8;font-weight:600;">Self &amp; Direction</td>
+        <td>Telos system (TELOS, BELIEFS, GOALS, CHALLENGES, FRAMES, WISDOM, BOOKS), Discovery sessions, compounding ledgers</td>
+        <td style="color:#a0a0b8;">~100+</td>
+      </tr>
+      <tr>
+        <td style="color:#a0a0b8;font-weight:600;">Journal</td>
+        <td>Things Logbook 2023–2026 (~500 entries), daily journal 2026</td>
+        <td style="color:#a0a0b8;">~500</td>
+      </tr>
+      <tr>
+        <td style="color:#a0a0b8;font-weight:600;">Health</td>
+        <td>TRT timeline, bloodwork tracking (CSVs + PDFs), daily health log, nicotine cessation</td>
+        <td style="color:#a0a0b8;">~40+</td>
+      </tr>
+      <tr>
+        <td style="color:#a0a0b8;font-weight:600;">Family &amp; People</td>
+        <td>Parent relationship, dad/layoff saga, relationship ideals</td>
+        <td style="color:#a0a0b8;">~20+</td>
+      </tr>
+      <tr>
+        <td style="color:#a1a1aa;font-weight:600;">Naval Archive</td>
+        <td>~200 captured blog posts — entrepreneurship, wealth, philosophy, AI</td>
+        <td style="color:#a0a0b8;">~200</td>
+      </tr>
+      <tr>
+        <td style="color:#a1a1aa;font-weight:600;">Meta-Vault</td>
+        <td>Conformance system, root-sweep, vault maintenance, ADR log, nightly automation</td>
+        <td style="color:#a0a0b8;">~54</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Frontmatter -->
+<div class="section">
+  <h2><span class="icon">🏷️</span> Frontmatter — Present but Inconsistent</h2>
+
+  <p style="color:#a0a0b8; margin-bottom:16px;">
+    <strong>95%</strong> of active notes have frontmatter, but only <strong>41%</strong> have a <code>type:</code> field — the most important navigation aid for agents.
+    27 non-canonical types are in use (the ADR defines 13). Tag sprawl at 310 distinct tags with 177 singletons.
+  </p>
+
+  <div class="two-col">
+    <div>
+      <table>
+        <thead><tr><th>Field</th><th>Coverage</th><th>Rating</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">tags</td><td>81%</td><td><span class="tag positive">Good</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">source</td><td>51%</td><td><span class="tag info">Half</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">author</td><td>43%</td><td><span class="tag info">Half</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:#fbbf24;">type</td><td>41%</td><td><span class="tag warning">Weak</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">status</td><td>28%</td><td><span class="tag info">Partial</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">created</td><td>23%</td><td><span class="tag info">Partial</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Tier</th><th>Notes</th><th>Frontmatter %</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#4ade80;font-weight:600;">Active</td><td>557</td><td><span class="tag positive">95%</span></td></tr>
+          <tr><td style="color:#fbbf24;font-weight:600;">Journal</td><td>807</td><td><span class="tag warning">1%</span> (by design)</td></tr>
+          <tr><td style="color:#a1a1aa;font-weight:600;">Archive</td><td>1,524</td><td><span class="tag positive">97%</span></td></tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px;">
+        <div style="color:#c084fc;font-weight:600;font-size:0.85rem;margin-bottom:4px;">Canonical <code>type:</code> vocabulary (13, ADR-enforced):</div>
+        <div style="font-size:0.8rem;color:#a0a0b8;font-family:'JetBrains Mono',monospace;">
+          decision · domain-hub · evergreen · idea · index · moc · note · project · question · reference · report · section-index · task
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vault Guide Rules -->
+<div class="section">
+  <h2><span class="icon">📖</span> _Vault Guide.md — Operating Rules</h2>
+
+  <div class="rule-box">
+    <div class="rule-title">Routing Rule</div>
+    <div class="rule-desc">Sort by what attention a note needs: <strong>dated→Areas/Journal</strong>, <strong>active-with-finish-line→Projects</strong>, <strong>ongoing-life→Areas</strong>, <strong>reference→Resources</strong>, <strong>done→Archive</strong>.</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">Domain-Hub Shape</div>
+    <div class="rule-desc">4 standardized sections: <strong>What's true right now</strong> · <strong>What these notes mean</strong> (pattern across them) · <strong>How it connects</strong> (cross-hub links) · <strong>Next steps</strong> (concrete actions).</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">Project Standard</div>
+    <div class="rule-desc">Skeleton: hub note + Tasks Board.md + .base views. Tasks are task-notes on Kanban (not checkboxes). Status vocab: <strong>inbox·active·someday·done·dead</strong>.</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">ADR Immutability</div>
+    <div class="rule-desc">Decisions are <strong>immutable once accepted</strong>. Supersede with a new ADR, never rewrite history. Template: type, status, date, decision, summary, affected areas.</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">Agent Rule</div>
+    <div class="rule-desc"><strong>Never alter Ben's original text.</strong> Agents may add frontmatter, links, and structure — but the prose content of notes is untouchable.</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">Maintenance</div>
+    <div class="rule-desc">Nightly auto-commit + conformance check. Root sweep files loose captures. <strong>Detection only</strong> — does NOT auto-mutate content. Stale docs describe internal PARA layout; live vault uses Johnny-Decimal.</div>
+  </div>
+</div>
+
+<!-- Prose Quality -->
+<div class="section">
+  <h2><span class="icon">✍️</span> Prose Quality — Exceptional</h2>
+
+  <div class="pullquote">
+    "The wheel is income, not alpha. The edge I hoped for dies once real fills and costs are in. Selling cash-secured puts works as a lower-volatility income sleeve — not a market-beater. Stop expecting alpha from it."
+    <div style="margin-top:8px;font-style:normal;font-size:0.8rem;color:#6b6b80;">— 🧭 Money, Business &amp; Ideas (compounding ledger)</div>
+  </div>
+
+  <div class="pullquote">
+    "Ben expected hundreds or thousands of tactics given how many threads/listicles exist online. The threads number in the thousands, but the actual distinct tactics converge fast — 25 Reddit threads and 8 listicles kept re-surfacing the same ~100–120 ideas."
+    <div style="margin-top:8px;font-style:normal;font-size:0.8rem;color:#6b6b80;">— Unethical Money Catalog (with data-quality caveats)</div>
+  </div>
+
+  <p style="color:#a0a0b8;">The <strong>compounding ledger pattern</strong> (What I've done → What it taught me → Where my head's at → What to do next) appears across theme MOCs and creates honest, self-correcting prose. Notes flag their own contradictions: "The Lightstream loss still hasn't been <em>learned from</em>."</p>
+</div>
+
+<!-- Strengths -->
+<div class="section">
+  <h2><span class="icon">✅</span> Strengths</h2>
+  <ul class="list">
+    <li><span class="bullet">•</span> <strong>Prose quality is the vault's superpower</strong> — honest, self-aware, no fluff. The compounding ledger pattern creates continuous learning from past notes.</li>
+    <li><span class="bullet">•</span> <strong>5 domain hubs with standardized 4-section templates</strong> — every subsidiary note up-links to its hub. Hub structure is consistent across all 5 domains.</li>
+    <li><span class="bullet">•</span> <strong>Johnny-Decimal + PARA hybrid</strong> — numbers keep sort order; PARA gives semantic meaning. Well-documented routing rules.</li>
+    <li><span class="bullet">•</span> <strong>Nightly conformance automation</strong> — drift audit, orphan detection, tag sprawl checking, root sweep. 1,142 uncommitted changes caught and fixed.</li>
+    <li><span class="bullet">•</span> <strong>ADR log with immutable decisions</strong> — 12+ architecture decisions with full rationale, never rewritten.</li>
+    <li><span class="bullet">•</span> <strong>13 note templates</strong> — Domain Hub, Project Hub, Agent-Card, Session Log, Capture, Health EOD. Standardized shapes for every note type.</li>
+    <li><span class="bullet">•</span> <strong>Agent-Config resources</strong> — About Ben, Rules for agents, Interaction Style, Writing Style. All ready for AI consumption.</li>
+    <li><span class="bullet">•</span> <strong>The Things Logbook</strong> — 500 entries spanning 2023–2026. Long-term life context that no other system has.</li>
+  </ul>
+</div>
+
+<!-- Weaknesses -->
+<div class="section">
+  <h2><span class="icon">⚠️</span> Weaknesses &amp; Risks</h2>
+  <ul class="list">
+    <li><span class="bullet warn">•</span> <strong>type: coverage only 41%</strong> — the single field agents need most is missing from 59% of active notes. 120 notes use 27 non-canonical types.</li>
+    <li><span class="bullet warn">•</span> <strong>No AGENTS.md</strong> — Vault-v2 lacks a root-level agent entry point. The vault guide exists but is human-facing. Agents need a separate "read this first" document.</li>
+    <li><span class="bullet warn">•</span> <strong>74 true orphans</strong> — notes with no inbound links and no ↑ up-link. 51 dead-end notes with no outbound links.</li>
+    <li><span class="bullet bad">•</span> <strong>Archive nearly empty</strong> — 1,524 archive-tier notes exist but only 2 live in 99 Archive/. The archive content lives in the old iCloud copy, not the active vault.</li>
+    <li><span class="bullet bad">•</span> <strong>Nightly jobs partially loaded</strong> — root-sweep launchd job is "LEFT UNLOADED." Morning maintenance requires manual steps.</li>
+    <li><span class="bullet warn">•</span> <strong>106 folders missing hub notes</strong> — subdirectories without index notes, breaking navigation for agents.</li>
+    <li><span class="bullet warn">•</span> <strong>Agent-brain docs are stale</strong> — some Knowledge docs describe the internal PARA layout, not the live SSD Johnny-Decimal layout.</li>
+    <li><span class="bullet warn">•</span> <strong>Tag sprawl</strong> — 310 distinct tags, 177 singletons. The controlled theme vocabulary (5 tags) is disciplined but the broader tag space isn't.</li>
+  </ul>
+</div>
+
+<!-- AI Readiness -->
+<div class="section">
+  <h2><span class="icon">🤖</span> AI-Friendliness Assessment</h2>
+
+  <p style="color:#a0a0b8; margin-bottom:16px;">
+    This vault is human-first by design. It's not optimized for AI navigation, but it <em>could be</em>. The pieces are there — they just need assembly.
+  </p>
+
+  <table>
+    <thead><tr><th>What's needed</th><th>Status</th><th>Location</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="font-weight:600;">Agent entry point (AGENTS.md)</td>
+        <td><span class="tag danger">Missing</span></td>
+        <td style="color:#a0a0b8;">Needs creation at vault root. Model after agent-brain's AGENTS.md</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;">trust-tier system</td>
+        <td><span class="tag danger">Missing</span></td>
+        <td style="color:#a0a0b8;">agent-brain has LIVE/SEED/SYN/ARCHIVE. Vault-v2 has no equivalent</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;">Agent persona config</td>
+        <td><span class="tag positive">Present</span></td>
+        <td style="color:#a0a0b8;">30 Resources/Agent-Config/: About Ben, Rules, Interaction Style, Writing Style</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;">Pattern Library</td>
+        <td><span class="tag positive">Present</span></td>
+        <td style="color:#a0a0b8;">90 System/AI-System/Pattern Library/: 15 reusable agent patterns</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;">Note type taxonomy</td>
+        <td><span class="tag info">Partial</span></td>
+        <td style="color:#a0a0b8;">13 canonical types defined, but only 41% of notes use them</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;">Domain hub navigation</td>
+        <td><span class="tag positive">Present</span></td>
+        <td style="color:#a0a0b8;">5 hubs with ↑ up-links from every subsidiary note</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;">Conformance monitoring</td>
+        <td><span class="tag positive">Present</span></td>
+        <td style="color:#a0a0b8;">Nightly drift audit. Detection only, not auto-fix</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Notable Notes -->
+<div class="section">
+  <h2><span class="icon">⭐</span> Notable Files</h2>
+
+  <div class="notable-grid">
+    <div class="notable-card">
+      <div class="note-path">00 Home/_Vault Guide.md</div>
+      <div class="note-reason">The vault's operating manual — routing rules, conventions, domain hub shape, project standard.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">🧭 Money, Business &amp; Ideas</div>
+      <div class="note-reason">Exemplary compounding ledger. Self-corrects the "test the wheel" loop. Honest about alpha vs income.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Unethical Money Catalog</div>
+      <div class="note-reason">Model research note with status dashboard, data-quality caveats, and diminishing returns analysis.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Conformance Report</div>
+      <div class="note-reason">Auto-generated drift audit — the single truth about vault health, updated nightly.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">ADR log (12+ decisions)</div>
+      <div class="note-reason">Immutable architecture decisions with full rationale. Vault target, capture types, task model, convention enforcement.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Domain Hub template</div>
+      <div class="note-reason">Standardized 4-section hub template used consistently across all 5 domains.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Pattern Library (15 patterns)</div>
+      <div class="note-reason">Reusable agent patterns: Agent Orchestrator, Gated Optimization, PA Persona, Workflow Routing, etc.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Agent-Config/About Ben.md</div>
+      <div class="note-reason">Agent persona configuration — interaction style, writing style, operator preferences, assistant persona.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Things Logbook</div>
+      <div class="note-reason">~500 entries spanning 2023–2026. Unmatched longitudinal personal context.</div>
+    </div>
+    <div class="notable-card">
+      <div class="note-path">Telos System</div>
+      <div class="note-reason">Structured self-exploration: TELOS, BELIEFS, GOALS, CHALLENGES, FRAMES, WISDOM, BOOKS.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Gaps -->
+<div class="section">
+  <h2><span class="icon">🔍</span> What's Missing</h2>
+  <ul class="list">
+    <li><span class="bullet bad">•</span> <strong>No AGENTS.md</strong> — an AI agent arriving at this vault has no "read this first" document. The Vault Guide exists but it's human-facing.</li>
+    <li><span class="bullet bad">•</span> <strong>No trust-tier system</strong> — agent-brain has LIVE/SEED/SYN/ARCHIVE with confidence fields. Vault-v2 doesn't distinguish trustworthy notes from stale ones.</li>
+    <li><span class="bullet warn">•</span> <strong>type: field missing from 59% of notes</strong> — agents can't classify what kind of content they're looking at without the type field.</li>
+    <li><span class="bullet warn">•</span> <strong>Archive in iCloud, not in vault</strong> — 1,524 archive-tier notes exist but only 2 in 99 Archive/. The archive needs to move.</li>
+    <li><span class="bullet">•</span> <strong>Inbox notes lack any frontmatter</strong> — no date, type, or tags on raw captures. Makes automated routing harder.</li>
+    <li><span class="bullet">•</span> <strong>Daily Report's Lightstream retrospective</strong> — referenced as outstanding in Money theme hub. Never written.</li>
+    <li><span class="bullet">•</span> <strong>Root-sweep unloaded</strong> — manual step needed for nightly file routing.</li>
+    <li><span class="bullet">•</span> <strong>106 folder-note hubs missing</strong> — subdirectories without index notes.</li>
+  </ul>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center; padding:40px 0 20px; color:#6b6b80; font-size:0.8rem;">
+  Ax Brain Crew Vault Assessment · Generated 2026-07-19 · Source: Vault-v2 at /Volumes/Extra Storage Crucial 1TB SSD/Projects/Infrastructure/obsidian-vault/Vault-v2
+</div>
+
+</div>
+</body>
+</html>

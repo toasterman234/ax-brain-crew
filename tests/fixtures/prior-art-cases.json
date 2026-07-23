@@ -1,0 +1,12 @@
+{
+  "flowId": "prior-art",
+  "description": "Eval cases for Prior Art research flow — checks discovery returns results",
+  "cases": [
+    {
+      "id": "pa-01",
+      "input": { "userRequest": "prior art for TypeScript agent frameworks" },
+      "expected": { "minMatches": 1 },
+      "metric": "function score(output, expected) {\n  const o = output?.output ?? {};\n  const discovery = o.discovery ?? {};\n  if (typeof discovery.totalMatches === 'number' && discovery.totalMatches >= (expected?.minMatches ?? 1)) return 1.0;\n  if (o.finalResponse) return 0.5;\n  return 0;\n}"
+    }
+  ]
+}

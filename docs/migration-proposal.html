@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migration Proposal — Vault-v2 → Ax Brain Crew Vault</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0d0d12; color: #e0e0e8; line-height: 1.6; min-height: 100vh; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  .header { padding: 48px 0 32px; border-bottom: 1px solid #1e1e2e; margin-bottom: 40px; }
+  .header h1 { font-size: 2.4rem; font-weight: 700; color: #f0f0f8; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .header .subtitle { font-size: 1rem; color: #8888a0; }
+
+  .section { margin-bottom: 40px; }
+  .section h2 { font-size: 1.3rem; font-weight: 600; color: #c0c0d8; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #1e1e2e; display: flex; align-items: center; gap: 10px; }
+  .section h3 { font-size: 1.05rem; font-weight: 600; color: #a0a0c0; margin: 20px 0 10px; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin: 2px 4px 2px 0; }
+  .tag.port { background: #064e3b; color: #4ade80; }
+  .tag.port-synth { background: #1e3a5f; color: #60a5fa; }
+  .tag.port-meta { background: #4c1d95; color: #c084fc; }
+  .tag.skip { background: #7f1d1d; color: #f87171; }
+  .tag.stay { background: #18181b; color: #a1a1aa; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 16px; }
+  thead th { text-align: left; padding: 10px 14px; color: #6b6b80; font-weight: 500; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.05em; border-bottom: 1px solid #1e1e2e; background: #0f0f16; }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid #111118; vertical-align: top; font-size: 0.88rem; }
+  tbody tr:hover { background: #161622; }
+
+  .path { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #60a5fa; }
+  .dest { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #4ade80; }
+  .note { font-size: 0.82rem; color: #a0a0b8; }
+
+  .rule-box { background: #0a0a10; border: 1px solid #1e1e2e; border-radius: 8px; padding: 20px 24px; margin-bottom: 12px; }
+  .rule-box .rule-title { font-weight: 600; color: #c084fc; margin-bottom: 6px; font-size: 0.9rem; }
+  .rule-box .rule-desc { font-size: 0.85rem; color: #a0a0b8; line-height: 1.6; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat { background: #14141e; border: 1px solid #1e1e2e; border-radius: 8px; padding: 14px 16px; text-align: center; }
+  .stat .stat-value { font-size: 1.8rem; font-weight: 700; }
+  .stat .stat-label { font-size: 0.75rem; color: #6b6b80; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .stat-value.green { color: #4ade80; }
+  .stat-value.blue { color: #60a5fa; }
+  .stat-value.purple { color: #c084fc; }
+  .stat-value.red { color: #f87171; }
+
+  .tree { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.8; background: #0a0a10; border: 1px solid #1e1e2e; border-radius: 8px; padding: 20px 24px; color: #8899aa; }
+  .tree .dir { color: #60a5fa; }
+  .tree .file { color: #a0a0b8; }
+  .tree .new { color: #4ade80; }
+  .tree .comment { color: #6b6b80; }
+
+  .phase-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 8px; vertical-align: middle; }
+  .phase-badge.p1 { background: #7f1d1d; color: #f87171; }
+  .phase-badge.p2 { background: #78350f; color: #fbbf24; }
+  .phase-badge.p3 { background: #1e3a5f; color: #60a5fa; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .pullquote { background: #1a1a2e; border-left: 3px solid #c084fc; padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0; color: #c0c0d8; font-style: italic; font-size: 0.95rem; }
+
+  .divider { border: none; border-top: 1px solid #1e1e2e; margin: 32px 0; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+  <h1>📦 Migration Proposal</h1>
+  <div class="subtitle">Vault-v2 → Ax Brain Crew Vault — what to port, what stays, and how it's organized</div>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid">
+  <div class="stat">
+    <div class="stat-value green">~45</div>
+    <div class="stat-label">Notes to Port</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value blue">~6</div>
+    <div class="stat-label">Synthesized Pages</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value purple">3</div>
+    <div class="stat-label">Phases</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value red">~2,800</div>
+    <div class="stat-label">Stay in Vault-v2</div>
+  </div>
+</div>
+
+<!-- Principle -->
+<div class="section">
+  <h2><span>🧭</span> Guiding Principle</h2>
+
+  <div class="pullquote">
+    The crew vault is for agents. Port what helps agents understand Ben's thinking, preferences, decisions, and patterns. Leave what's personal, private, raw, or time-bound. Synthesize before copying — don't dump raw notes into the new vault.
+  </div>
+
+  <div class="rule-box">
+    <div class="rule-title">Port Rule</div>
+    <div class="rule-desc">If an agent needs to know it to do useful work for Ben → port. If it's Ben's personal reflection, health data, journal, or raw reference dump → stays.</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">Synthesize Rule</div>
+    <div class="rule-desc">Before copying a note verbatim, check if the insight can be consolidated with related notes. The crew vault should have fewer, denser notes than the source.</div>
+  </div>
+  <div class="rule-box">
+    <div class="rule-title">Frontmatter Rule</div>
+    <div class="rule-desc">Every ported note gets the crew vault frontmatter standard: <code>date, type, tags, ai-first: true</code>. Add <code>## For future agents</code> preamble. Add <code>confidence</code> and <code>source</code> where known.</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Phase 1: Direct Ports -->
+<div class="section">
+  <h2><span class="phase-badge p1">Phase 1</span> Direct Ports — High-value, No Synthesis Needed</h2>
+  <p style="color:#a0a0b8; margin-bottom:16px;">These notes are already well-structured, self-contained, and valuable for agents. Copy with frontmatter upgrades.</p>
+
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:28%">Destination</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="path">00 Home/_Vault Guide.md</td>
+        <td class="dest">Knowledge/vault-v2-routing-rules.md</td>
+        <td class="note">Core routing rules, domain hub shape, project standard, PARA semantics. Rename to reflect it's reference about the original vault, not the crew vault.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Agent-Config/About Ben.md</td>
+        <td class="dest">Knowledge/ben-profile.md</td>
+        <td class="note">Agent persona. This is the single most important file for agents to understand who they're working for.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Agent-Config/Rules for agents.md</td>
+        <td class="dest">Knowledge/agent-rules.md</td>
+        <td class="note">Behavioral constraints: never alter original text, search before building, explain simply, etc.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Agent-Config/Interaction Style.md</td>
+        <td class="dest">Knowledge/interaction-style.md</td>
+        <td class="note">How Ben likes agents to communicate — tone, verbosity, format preferences.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Agent-Config/Writing Style.md</td>
+        <td class="dest">Knowledge/writing-style.md</td>
+        <td class="note">ASCII only, no em-dashes, no curly quotes. Conventions that apply to all agent-generated content.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Agent-Config/Operator Prefs.md</td>
+        <td class="dest">Knowledge/operator-preferences.md</td>
+        <td class="note">Tool preferences, workflow habits, default choices.</td>
+      </tr>
+      <tr>
+        <td class="path">90 System/Decisions/ADRs (all 12+)</td>
+        <td class="dest">Architecture/adr-*.md</td>
+        <td class="note">Immutable decision records. One note per ADR in Architecture/. Preserve the original rationale exactly.</td>
+      </tr>
+      <tr>
+        <td class="path">90 System/Conformance/Conformance Report.md</td>
+        <td class="dest">Knowledge/vault-v2-conformance-latest.md</td>
+        <td class="note">Snapshot of Vault-v2's health at migration time. Not updated — historical reference. Single note with date.</td>
+      </tr>
+      <tr>
+        <td class="path">90 System/AI-System/Pattern Library/ (15 patterns)</td>
+        <td class="dest">Architecture/patterns/*.md</td>
+        <td class="note">One note per pattern: Agent Orchestrator, Gated Optimization, PA Persona, Workflow Routing, Quant Conductor, etc. These are directly useful for the crew's own architecture.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Template/Domain Hub.md</td>
+        <td class="dest">Templates/tpl-domain-hub.md</td>
+        <td class="note">Standardized 4-section hub template. Adapt for crew vault use.</td>
+      </tr>
+      <tr>
+        <td class="path">30 Resources/Template/Project Hub.md</td>
+        <td class="dest">Templates/tpl-project-hub.md</td>
+        <td class="note">Project hub template. Complements the existing tpl-project.md.</td>
+      </tr>
+      <tr>
+        <td class="path">90 System/AI-System/Agent Inventory (All Systems).md</td>
+        <td class="dest">Knowledge/agent-systems-inventory.md</td>
+        <td class="note">Inventory of all AI touchpoints. Useful context for the crew to understand what else is running.</td>
+      </tr>
+      <tr>
+        <td class="path">90 System/AI-System/AI Control Surface Inventory/</td>
+        <td class="dest">Knowledge/ai-control-surface.md</td>
+        <td class="note">All AI touchpoints catalogued. Important context for the crew.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="color:#6b6b80; font-size:0.82rem;">~30 files copied with upgraded frontmatter and ## For future agents preambles.</p>
+</div>
+
+<hr class="divider">
+
+<!-- Phase 2: Synthesized Ports -->
+<div class="section">
+  <h2><span class="phase-badge p2">Phase 2</span> Synthesized Ports — Consolidate Multiple Source Notes</h2>
+  <p style="color:#a0a0b8; margin-bottom:16px;">These ideas are spread across multiple Vault-v2 notes. Port as synthesized pages that condense the insight into a single crew vault note with provenance.</p>
+
+  <table>
+    <thead><tr><th style="width:20%">New Note</th><th style="width:25%">Destination</th><th style="width:30%">Source Material</th><th>What It Captures</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-compounding-ledger.md</td>
+        <td class="dest">Knowledge/</td>
+        <td class="path">
+          🧭 Money, Business &amp; Ideas<br>
+          🧭 Life Direction<br>
+          🧭 Mind &amp; Self<br>
+          🧭 Father &amp; Family<br>
+          🧭 AI System — What I Want Built
+        </td>
+        <td class="note">The compounding ledger pattern: What I've done → What it taught me → Where my head's at → What to do next. Key insights from each domain condensed. Cross-domain patterns surfaced.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-ai-architecture.md</td>
+        <td class="dest">Architecture/</td>
+        <td class="path">
+          90 System/AI-System/Vault Automation Design.md<br>
+          90 System/AI-System/Infra CHANGELOG.md<br>
+          Pattern Library (architectural patterns)<br>
+          Various agent-brain references
+        </td>
+        <td class="note">The full picture of Ben's AI infrastructure — agent-runner, pi backend, fabro pipeline, vault loop, fleet command center. What runs where, what depends on what, current status.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-trading-system.md</td>
+        <td class="dest">Knowledge/</td>
+        <td class="path">
+          Trading/ (quant research)<br>
+          options wheel strategy notes<br>
+          Market Lake API docs<br>
+          🧭 Money theme hub mentions
+        </td>
+        <td class="note">The trading stack: options wheel ruleset (R1–R11), Market Lake/QuantConnect tooling, Schwab integration. What Ben has tested, what he knows works, what he's skeptical about.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-telos-system.md</td>
+        <td class="dest">Knowledge/</td>
+        <td class="path">
+          Self &amp; Direction/TELOS<br>
+          Self &amp; Direction/BELIEFS<br>
+          Self &amp; Direction/GOALS<br>
+          Discovery session notes
+        </td>
+        <td class="note">Condensed Telos framework: TELOS (purpose), BELIEFS, GOALS, CHALLENGES, FRAMES, WISDOM, BOOKS. What Ben believes about himself and where he's going. Useful for agents that need to align with Ben's direction.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-business-research.md</td>
+        <td class="dest">Knowledge/</td>
+        <td class="path">
+          Memphis Service Business Analysis/<br>
+          Koerner Research/<br>
+          Unethical Money Catalog<br>
+          🧭 Money theme hub mentions
+        </td>
+        <td class="note">Condensed business opportunity research. What Ben has evaluated, what patterns he found, what he concluded. The Unethical Money Catalog's diminishing returns insight.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-vault-philosophy.md</td>
+        <td class="dest">Knowledge/</td>
+        <td class="path">
+          _Vault Guide.md<br>
+          ADRs (vault design decisions)<br>
+          Conformance Report<br>
+          Vault System Redesign notes<br>
+          Agent-brain vault docs
+        </td>
+        <td class="note">Why Ben builds vaults the way he does. Johnny-Decimal, domain hubs, compounding ledgers. The RFC model for capture. Trust tiers. The philosophy behind the infrastructure.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="color:#6b6b80; font-size:0.82rem;">6 new synthesized notes. Each cites source material in frontmatter (<code>source: vault-v2</code>, <code>origin_names: [...]</code>).</p>
+</div>
+
+<hr class="divider">
+
+<!-- Phase 3: New Crew-Native Pages -->
+<div class="section">
+  <h2><span class="phase-badge p3">Phase 3</span> New Crew-Native Pages — Written Fresh for the Crew Vault</h2>
+  <p style="color:#a0a0b8; margin-bottom:16px;">These don't exist in Vault-v2. They're written fresh for the crew vault, informed by what we found in the assessment.</p>
+
+  <table>
+    <thead><tr><th style="width:22%">New Note</th><th style="width:18%">Destination</th><th style="width:35%">Purpose</th><th>What It Contains</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-system-map.md</td>
+        <td class="dest">Architecture/</td>
+        <td class="note">Single source of truth for all of Ben's running systems and their relationships.</td>
+        <td class="note">Every system in Ben's infrastructure: agent-runner (zimaos), pi backend (zimaos), mem0/Qdrant (:8010), fabro pipeline, vaultforge MCP, cliproxy (:8317), fleet command center (GitHub). What talks to what, what ports, what's paused.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-memory-architecture.md</td>
+        <td class="dest">Architecture/</td>
+        <td class="note">How Ben's memory systems work together.</td>
+        <td class="note">Vault-v2 (canonical, human-first) → crew vault (canonical, agent-first) → mem0/Qdrant (derived cache) → agent-brain (archived). The ONE-WAY rule. What lives where. What's authoritative.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-projects-index.md</td>
+        <td class="dest" style="color:#4ade80;">index.md section</td>
+        <td class="note">What Ben is actively working on and what's paused.</td>
+        <td class="note">Active: agent-runner, vault-v2 maintenance, trading/quant, service business research, daemon site. Paused: agent-brain (archived), ben-agents3 (trimmed 2026-06-22). Status and one-line summary per project.</td>
+      </tr>
+      <tr>
+        <td class="dest" style="font-weight:600;">ben-conventions.md</td>
+        <td class="dest">Knowledge/</td>
+        <td class="note">Consolidated behavioral conventions from agent-rules, interaction-style, writing-style.</td>
+        <td class="note">The complete ruleset for how agents should interact with Ben: search before building, explain simply, reactive architecture, no external SSD, ASCII-only, never alter original text, explain simply without jargon.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="divider">
+
+<!-- What Stays -->
+<div class="section">
+  <h2><span>🚫</span> What Stays in Vault-v2 (Not Ported)</h2>
+
+  <div class="two-col">
+    <div>
+      <table>
+        <thead><tr><th>Category</th><th>Why It Stays</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600;">Journal / Things Logbook</td><td>Personal, time-bound, private reflections. Not useful for agents.</td></tr>
+          <tr><td style="font-weight:600;">Health / Medical</td><td>TRT timeline, bloodwork, daily health logs. Private medical data.</td></tr>
+          <tr><td style="font-weight:600;">Family & People</td><td>Parent relationship, dad/layoff saga, relationship ideals. Deeply personal.</td></tr>
+          <tr><td style="font-weight:600;">Mind / Mental Health</td><td>Medication, hair-pulling, screen time. Private.</td></tr>
+          <tr><td style="font-weight:600;">Credentials / API Keys</td><td>Security — never port credentials.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Category</th><th>Why It Stays</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600;">Naval Archive (~200 notes)</td><td>Raw reference dump, not synthesized. Link back to it, don't copy it.</td></tr>
+          <tr><td style="font-weight:600;">Daemon Site content</td><td>Content designed for web, not vault. Already published.</td></tr>
+          <tr><td style="font-weight:600;">Tax / Finance records</td><td>Private.</td></tr>
+          <tr><td style="font-weight:600;">Discovery sessions (raw)</td><td>Raw personal exploration. Synthesized into telos-system.md.</td></tr>
+          <tr><td style="font-weight:600;">Health logs (daily)</td><td>Time-bound tracking data, not knowledge.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;">
+    <span class="tag stay">~2,800 notes stay</span>
+    <span class="tag port">~45 notes ported</span>
+    <span class="tag port-synth">~6 synthesized</span>
+    <span class="tag port-meta">~4 crew-native</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Target Vault Structure -->
+<div class="section">
+  <h2><span>🗂️</span> Target Crew Vault Structure (After Migration)</h2>
+
+  <div class="tree">
+    <span class="dir">vault/</span><br>
+    &nbsp;&nbsp;<span class="file">AGENTS.md</span><br>
+    &nbsp;&nbsp;<span class="file">Home.md</span><br>
+    &nbsp;&nbsp;<span class="file">index.md</span>                          <span class="comment">← expanded with new entries</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Inbox/</span>                            <span class="comment">← stays as-is</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Projects/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">ax-brain-crew.md</span>          <span class="comment">← existing</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-system-map.md</span>            <span class="comment">NEW — all systems and relationships</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Areas/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-ai-infrastructure.md</span>   <span class="comment">NEW — ongoing AI system stewardship</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Knowledge/</span>                        <span class="comment">← expands significantly</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-profile.md</span>              <span class="comment">About Ben — persona</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">agent-rules.md</span>              <span class="comment">Behavioral constraints</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">interaction-style.md</span>        <span class="comment">How Ben likes to interact</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">writing-style.md</span>             <span class="comment">ASCII conventions, etc.</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">operator-preferences.md</span>      <span class="comment">Tool and workflow defaults</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-compounding-ledger.md</span>     <span class="comment">SYNTHESIS — cross-domain insights</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-trading-system.md</span>         <span class="comment">SYNTHESIS — trading stack</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-telos-system.md</span>           <span class="comment">SYNTHESIS — Telos framework</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-business-research.md</span>      <span class="comment">SYNTHESIS — business evaluations</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-vault-philosophy.md</span>        <span class="comment">SYNTHESIS — why the vault works this way</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-conventions.md</span>            <span class="comment">NEW — consolidated conventions</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">agent-systems-inventory.md</span>     <span class="comment">All AI touchpoints</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ai-control-surface.md</span>          <span class="comment">AI surface inventory</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">vault-v2-routing-rules.md</span>      <span class="comment">Original vault routing</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">vault-v2-conformance-latest.md</span>  <span class="comment">Snapshot of Vault-v2 health</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Architecture/</span>                     <span class="comment">← expands</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">adr-*.md</span>                     <span class="comment">12+ ADRs from Vault-v2</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">patterns/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">agent-orchestrator.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">gated-optimization.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">pa-persona.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">workflow-routing.md</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="new">... (11 more patterns)</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-system-map.md</span>            <span class="comment">NEW — all Ben's systems</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">ben-memory-architecture.md</span>    <span class="comment">NEW — memory systems map</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Templates/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">tpl-domain-hub.md</span>            <span class="comment">Domain hub 4-section template</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="new">tpl-project-hub.md</span>            <span class="comment">Project hub template</span><br>
+    <br>
+    &nbsp;&nbsp;<span class="dir">Daily/</span>                            <span class="comment">← stays as-is</span><br>
+    &nbsp;&nbsp;<span class="dir">raw/</span>                              <span class="comment">← stays as-is</span><br>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Frontmatter Standard -->
+<div class="section">
+  <h2><span>🏷️</span> Frontmatter Standard for Ported Notes</h2>
+
+  <p style="color:#a0a0b8; margin-bottom:16px;">Every ported note gets these fields added or upgraded. Existing content is preserved; only metadata is changed.</p>
+
+  <table>
+    <thead><tr><th style="width:25%">Field</th><th>Value</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">date</td>
+        <td style="font-family:'JetBrains Mono',monospace;">2026-07-19</td>
+        <td class="note">Port date (unless original creation date is known)</td>
+      </tr>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">type</td>
+        <td style="font-family:'JetBrains Mono',monospace;">reference</td>
+        <td class="note">Most ported notes are reference material</td>
+      </tr>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">tags</td>
+        <td style="font-family:'JetBrains Mono',monospace;">[port, vault-v2, ...]</td>
+        <td class="note">Domain-specific tags based on content</td>
+      </tr>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">ai-first</td>
+        <td style="font-family:'JetBrains Mono',monospace;">true</td>
+        <td class="note">All crew vault notes are AI-first</td>
+      </tr>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">source</td>
+        <td style="font-family:'JetBrains Mono',monospace;">vault-v2</td>
+        <td class="note">Provenance tracking</td>
+      </tr>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">origin_path</td>
+        <td style="font-family:'JetBrains Mono',monospace;">relative/path.md</td>
+        <td class="note">Original location in Vault-v2</td>
+      </tr>
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace;color:#60a5fa;">confidence</td>
+        <td style="font-family:'JetBrains Mono',monospace;">high</td>
+        <td class="note">Most ported content is high-confidence (Ben's own words)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="divider">
+
+<!-- Execution Plan -->
+<div class="section">
+  <h2><span>⚡</span> Execution Plan</h2>
+
+  <div class="rule-box">
+    <div class="rule-title">Phase 1 — Direct Ports (Scribe-driven)</div>
+    <div class="rule-desc">
+      For each of the ~30 direct-port notes:<br>
+      1. Read the source from Vault-v2 via ext.read<br>
+      2. Add crew vault frontmatter<br>
+      3. Add ## For future agents preamble (2-3 sentences: what, why, staleness)<br>
+      4. Write into appropriate crew vault folder<br>
+      5. Add wikilinks to related notes<br><br>
+      <strong>Dry-run first</strong>, review the proposed files, then execute.
+    </div>
+  </div>
+
+  <div class="rule-box">
+    <div class="rule-title">Phase 2 — Synthesized Ports (Seeker + Scribe)</div>
+    <div class="rule-desc">
+      For each of the 6 synthesis targets:<br>
+      1. Seeker reads all source material from Vault-v2<br>
+      2. Seeker identifies cross-cutting insights and patterns<br>
+      3. Scribe writes a single condensed note with provenance<br>
+      4. Frontmatter includes origin_names listing all source files<br><br>
+      These are the most valuable notes — they capture patterns, not just data.
+    </div>
+  </div>
+
+  <div class="rule-box">
+    <div class="rule-title">Phase 3 — Crew-Native Pages (Scribe)</div>
+    <div class="rule-desc">
+      Written fresh, informed by the assessment:<br>
+      1. ben-system-map.md — every system in Ben's infrastructure<br>
+      2. ben-memory-architecture.md — how vaults, mem0, and agent-brain relate<br>
+      3. ben-projects-index.md — what's active, what's paused<br>
+      4. ben-conventions.md — consolidated agent behavioral rules<br><br>
+      These fill gaps the assessment identified. They make the crew vault self-contained.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- What this gives you -->
+<div class="section">
+  <h2><span>🎯</span> What This Gives You</h2>
+
+  <ul class="list">
+    <li><span class="bullet">•</span> <strong>A self-contained crew vault</strong> that agents can navigate without access to Vault-v2. Everything they need to understand Ben's thinking, preferences, infrastructure, and decisions is in one place.</li>
+    <li><span class="bullet">•</span> <strong>Clear provenance</strong> — every ported note traces back to its Vault-v2 source via frontmatter. Nothing is orphaned.</li>
+    <li><span class="bullet">•</span> <strong>Density over volume</strong> — ~55 notes instead of ~2,888. The 6 synthesized pages condense hundreds of source notes into actionable insights.</li>
+    <li><span class="bullet">•</span> <strong>Privacy preserved</strong> — personal journal entries, health data, family notes, credentials, and raw reference dumps stay in Vault-v2. Only what agents need to know comes over.</li>
+    <li><span class="bullet">•</span> <strong>Pattern Library accessible</strong> — 15 agent patterns from Vault-v2 organized in Architecture/patterns/, directly usable by the crew's own agents.</li>
+    <li><span class="bullet">•</span> <strong>System map</strong> — ben-system-map.md answers the question every new agent asks: "what's running, where, and how do they connect?"</li>
+  </ul>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center; padding:40px 0 20px; color:#6b6b80; font-size:0.8rem;">
+  Ax Brain Crew Migration Proposal · Generated 2026-07-19 · Source: Vault-v2 Assessment
+</div>
+
+</div>
+</body>
+</html>

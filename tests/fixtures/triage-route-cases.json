@@ -1,0 +1,12 @@
+{
+  "flowId": "triage-route",
+  "description": "Eval cases for Triage Route flow",
+  "cases": [
+    {
+      "id": "tr-01",
+      "input": { "userRequest": "route these items" },
+      "expected": { "minScanned": 0 },
+      "metric": "function score(output, expected) {\n  const o = output?.output ?? {};\n  if (typeof o.totalScanned === 'number' && o.totalScanned >= (expected?.minScanned ?? 0)) return 1.0;\n  if (o.response) return 0.5;\n  return 0;\n}"
+    }
+  ]
+}

@@ -1,0 +1,367 @@
+{
+  "cases": [
+    {
+      "id": "s-01",
+      "expectedAgent": "scribe",
+      "request": "Save this thought: distributed systems need better observability defaults"
+    },
+    {
+      "id": "s-02",
+      "expectedAgent": "scribe",
+      "request": "Capture this idea about building a CLI tool for vault management"
+    },
+    {
+      "id": "s-03",
+      "expectedAgent": "scribe",
+      "request": "Write a note about the meeting I had with Sarah yesterday"
+    },
+    {
+      "id": "s-04",
+      "expectedAgent": "scribe",
+      "request": "Clean up this note: the project timeline is slipping and we need to re-scope"
+    },
+    {
+      "id": "s-05",
+      "expectedAgent": "scribe",
+      "request": "Turn this into a note: agentic workflows need structured output boundaries"
+    },
+    {
+      "id": "s-06",
+      "expectedAgent": "scribe",
+      "request": "Record this idea: a personal knowledge graph that learns from usage patterns"
+    },
+    {
+      "id": "s-07",
+      "expectedAgent": "scribe",
+      "request": "Draft a note about the architecture decision to use SQLite for runtime state"
+    },
+    {
+      "id": "s-08",
+      "expectedAgent": "scribe",
+      "request": "Create a project note for the ax-brain-crew initiative"
+    },
+    {
+      "id": "s-09",
+      "expectedAgent": "scribe",
+      "request": "I want to save a thought about deterministic routing vs AI classification"
+    },
+    {
+      "id": "s-10",
+      "expectedAgent": "scribe",
+      "request": "Can you write down my idea for an agent observability dashboard"
+    },
+    {
+      "id": "k-01",
+      "expectedAgent": "seeker",
+      "request": "What have I written about LLM observability?"
+    },
+    {
+      "id": "k-02",
+      "expectedAgent": "seeker",
+      "request": "Find my notes about distributed systems"
+    },
+    {
+      "id": "k-03",
+      "expectedAgent": "seeker",
+      "request": "Search my vault for anything about TypeScript compiler plugins"
+    },
+    {
+      "id": "k-04",
+      "expectedAgent": "seeker",
+      "request": "Summarize what I know about agent routing patterns"
+    },
+    {
+      "id": "k-05",
+      "expectedAgent": "seeker",
+      "request": "Any notes on LiteLLM configuration?"
+    },
+    {
+      "id": "k-06",
+      "expectedAgent": "seeker",
+      "request": "What do I have about prompt engineering techniques?"
+    },
+    {
+      "id": "k-07",
+      "expectedAgent": "seeker",
+      "request": "Look up my previous research on structured outputs"
+    },
+    {
+      "id": "k-08",
+      "expectedAgent": "seeker",
+      "request": "Research what I've documented about the obsidian vault conventions"
+    },
+    {
+      "id": "k-09",
+      "expectedAgent": "seeker",
+      "request": "What have I written about AxLLM"
+    },
+    {
+      "id": "k-10",
+      "expectedAgent": "seeker",
+      "request": "Find any notes about rate limiting strategies"
+    },
+    {
+      "id": "o-01",
+      "expectedAgent": "sorter",
+      "request": "Organize the notes in my inbox"
+    },
+    {
+      "id": "o-02",
+      "expectedAgent": "sorter",
+      "request": "File this note into the right folder"
+    },
+    {
+      "id": "o-03",
+      "expectedAgent": "sorter",
+      "request": "Sort these notes and classify them properly"
+    },
+    {
+      "id": "o-04",
+      "expectedAgent": "sorter",
+      "request": "Triage my inbox and suggest where things should go"
+    },
+    {
+      "id": "o-05",
+      "expectedAgent": "sorter",
+      "request": "Clean up my vault - there are loose notes everywhere"
+    },
+    {
+      "id": "o-06",
+      "expectedAgent": "sorter",
+      "request": "Move this note from inbox to projects"
+    },
+    {
+      "id": "o-07",
+      "expectedAgent": "sorter",
+      "request": "Tidy up the vault structure"
+    },
+    {
+      "id": "o-08",
+      "expectedAgent": "sorter",
+      "request": "Classify the new notes and put them where they belong"
+    },
+    {
+      "id": "o-09",
+      "expectedAgent": "sorter",
+      "request": "I have 10 uncategorized notes, can you sort them?"
+    },
+    {
+      "id": "o-10",
+      "expectedAgent": "sorter",
+      "request": "Review my vault and suggest reorganization"
+    },
+    {
+      "id": "amb-01",
+      "expectedAgent": "clarify",
+      "request": "Help me with something"
+    },
+    {
+      "id": "amb-02",
+      "expectedAgent": "clarify",
+      "request": "I need assistance"
+    },
+    {
+      "id": "amb-03",
+      "expectedAgent": "clarify",
+      "request": "Process my notes"
+    },
+    {
+      "id": "amb-04",
+      "expectedAgent": "clarify",
+      "request": "Look at this"
+    },
+    {
+      "id": "amb-05",
+      "expectedAgent": "clarify",
+      "request": "Do the thing"
+    },
+    {
+      "id": "a-01",
+      "expectedAgent": "architect",
+      "request": "Scaffold a project for a new CLI tool"
+    },
+    {
+      "id": "a-02",
+      "expectedAgent": "architect",
+      "request": "Set up a new area for finance tracking"
+    },
+    {
+      "id": "a-03",
+      "expectedAgent": "architect",
+      "request": "Create an MOC for my agent architecture notes"
+    },
+    {
+      "id": "a-04",
+      "expectedAgent": "architect",
+      "request": "Design a folder layout for the research project"
+    },
+    {
+      "id": "a-05",
+      "expectedAgent": "architect",
+      "request": "Build an index for the knowledge base"
+    },
+    {
+      "id": "c-01",
+      "expectedAgent": "connector",
+      "request": "Connect my notes about distributed systems"
+    },
+    {
+      "id": "c-02",
+      "expectedAgent": "connector",
+      "request": "Find related notes to my LLM research"
+    },
+    {
+      "id": "c-03",
+      "expectedAgent": "connector",
+      "request": "What themes span across my vault?"
+    },
+    {
+      "id": "c-04",
+      "expectedAgent": "connector",
+      "request": "Identify orphans in my note collection"
+    },
+    {
+      "id": "c-05",
+      "expectedAgent": "connector",
+      "request": "Suggest links between my architecture notes"
+    },
+    {
+      "id": "l-01",
+      "expectedAgent": "librarian",
+      "request": "Audit my vault for broken links"
+    },
+    {
+      "id": "l-02",
+      "expectedAgent": "librarian",
+      "request": "Check vault health and report issues"
+    },
+    {
+      "id": "l-03",
+      "expectedAgent": "librarian",
+      "request": "Find broken links in my notes"
+    },
+    {
+      "id": "l-04",
+      "expectedAgent": "librarian",
+      "request": "Validate frontmatter across all notes"
+    },
+    {
+      "id": "l-05",
+      "expectedAgent": "librarian",
+      "request": "Inspect the vault for consistency issues"
+    },
+    {
+      "id": "l-06",
+      "expectedAgent": "librarian",
+      "request": "audit and assess the agents file to see if its actually accurate compared to our actual agent/vault setup"
+    },
+    {
+      "id": "sc-01",
+      "expectedAgent": "scout",
+      "request": "Explore my projects on disk and tell me what I have"
+    },
+    {
+      "id": "sc-02",
+      "expectedAgent": "scout",
+      "request": "Find my projects in the home directory"
+    },
+    {
+      "id": "sc-03",
+      "expectedAgent": "scout",
+      "request": "Scan my filesystem for code projects"
+    },
+    {
+      "id": "sc-04",
+      "expectedAgent": "scout",
+      "request": "Search GitHub for my LLM-related repos"
+    },
+    {
+      "id": "sc-05",
+      "expectedAgent": "scout",
+      "request": "Inventory all my projects and tell me which ones are active"
+    },
+    {
+      "id": "sc-06",
+      "expectedAgent": "scout",
+      "request": "Discover my repositories and walk through the directories"
+    },
+    {
+      "id": "rw-01",
+      "expectedAgent": "librarian",
+      "request": "Assess and evaluate what this agent did — find contradictions, missed assumptions, and unsupported claims in their output"
+    },
+    {
+      "id": "rw-02",
+      "expectedAgent": "librarian",
+      "request": "Review this agent's report and tell me what's wrong with it"
+    },
+    {
+      "id": "rw-03",
+      "expectedAgent": "librarian",
+      "request": "See this from another agent and assess/evaluate their claims"
+    },
+    {
+      "id": "rw-04",
+      "expectedAgent": "librarian",
+      "request": "Look at what this agent built — is it correct? What did they miss?"
+    },
+    {
+      "id": "rw-05",
+      "expectedAgent": "librarian",
+      "request": "Evaluate what this agent did and compare it to what Mira already offers"
+    },
+    {
+      "id": "gh-01",
+      "expectedAgent": "scout",
+      "request": "Would this GitHub repo work for my stack? https://github.com/some/repo"
+    },
+    {
+      "id": "gh-02",
+      "expectedAgent": "scout",
+      "request": "How could I use this tool, what would it entail? https://github.com/user/tool"
+    },
+    {
+      "id": "gh-03",
+      "expectedAgent": "scout",
+      "request": "Evaluate this repo and tell me if we should adopt it"
+    },
+    {
+      "id": "dx-01",
+      "expectedAgent": "librarian",
+      "request": "Something's broken with agentmemory — investigate what the issue is"
+    },
+    {
+      "id": "dx-02",
+      "expectedAgent": "librarian",
+      "request": "There's an error in the vault — can you diagnose and fix it?"
+    },
+    {
+      "id": "dx-03",
+      "expectedAgent": "architect",
+      "request": "The autosummarizer keeps failing. Look at what litellm key it's using and fix it"
+    },
+    {
+      "id": "su-01",
+      "expectedAgent": "architect",
+      "request": "Can you set up my pi agent with meridian to use claude code subscription?"
+    },
+    {
+      "id": "su-02",
+      "expectedAgent": "architect",
+      "request": "Can you set this up for my pi agent? https://github.com/some/integration"
+    },
+    {
+      "id": "su-03",
+      "expectedAgent": "architect",
+      "request": "Give me a custom provider key with openai completions from my litellm setup"
+    },
+    {
+      "id": "seeker-capture-20260723010440",
+      "sourceRunId": "d05fa43f-7611-41b6-b6e5-7f1815f8d895",
+      "sourceStatus": "completed",
+      "regression": false,
+      "request": "/seeker Research and look into all of these things: how much of our agent sessions data are we using as data sets? What are the use cases for session data? What makes our session data hard to use/unreliable?",
+      "expectedAgent": "seeker"
+    }
+  ]
+}

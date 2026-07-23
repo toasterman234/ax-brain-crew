@@ -1,0 +1,12 @@
+{
+  "flowId": "deep-clean",
+  "description": "Eval cases for Deep Clean flow — checks that the flow identifies notes to fix",
+  "cases": [
+    {
+      "id": "dc-01",
+      "input": { "userRequest": "deep clean my vault" },
+      "expected": { "notesToFixMin": 0, "reportWritten": true },
+      "metric": "function score(output, expected) {\n  const o = output?.output ?? {};\n  if (!o.reportWritten && !o.reportPath) return 0;\n  if (Array.isArray(o.notesToFix) && o.notesToFix.length >= (expected?.notesToFixMin ?? 0)) return 1.0;\n  return 0.5;\n}"
+    }
+  ]
+}

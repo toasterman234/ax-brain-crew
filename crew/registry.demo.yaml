@@ -1,0 +1,46 @@
+# Demo agent registry — slim version for new users.
+# Copy this over crew/registry.yaml if you want a fresh start.
+#
+# To add your own agent:
+#   1. Add a new entry under `agents:` below
+#   2. Create the instruction file at `crew/agents/<your-agent>.md`
+#   3. Restart `crew serve`
+#
+# See crew/skills/create-agent.md for a step-by-step guide.
+
+agents:
+  demo-assistant:
+    name: Demo Assistant
+    description: A general-purpose chat agent that answers questions, explains concepts, and helps with tasks.
+    instructions: crew/agents/demo-assistant.md
+    modelTier: fast
+    allowedTools: []
+    triggers:
+      - help me with
+      - explain
+      - what is
+      - how do I
+      - write a
+      - can you
+    handoffs:
+      allowedTargets:
+        - demo-researcher
+
+  demo-researcher:
+    name: Demo Researcher
+    description: Searches the web and synthesizes current information with citations.
+    instructions: crew/agents/demo-researcher.md
+    modelTier: smart
+    allowedTools:
+      - web.search
+      - web.fetch
+    triggers:
+      - research
+      - search the web
+      - find information about
+      - what's new in
+      - current news about
+      - look up online
+    handoffs:
+      allowedTargets:
+        - demo-assistant

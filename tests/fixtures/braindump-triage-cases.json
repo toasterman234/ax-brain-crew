@@ -1,0 +1,31 @@
+{
+  "flowId": "braindump-triage",
+  "description": "Eval cases for Braindump Triage flow — input is a raw multi-item braindump, expected checks item count",
+  "cases": [
+    {
+      "id": "bt-01",
+      "input": {
+        "braindumpText": "Idea: build a CLI tool for vault management\nThought: Need better trace logs for agent debugging\nReminder: update the LiteLLM config for the new proxy"
+      },
+      "expected": {
+        "itemCount": 3,
+        "slugs": [
+          "build-cli-tool-for-vault-management",
+          "need-better-trace-logs-for-agent-debugging",
+          "update-the-litellm-config-for-the-new-proxy"
+        ]
+      },
+      "metric": "function score(output, expected) {\n  const items = output?.output?.items ?? [];\n  if (items.length !== expected.itemCount) return 0;\n  // Items should have confidence >= 'medium'\n  for (const item of items) {\n    if (item.confidence === 'speculation') return 0.5;\n  }\n  return 1.0;\n}"
+    },
+    {
+      "id": "bt-02",
+      "input": {
+        "braindumpText": "Fix the auth middleware timeout\nAdd rate limiting to the API gateway"
+      },
+      "expected": {
+        "itemCount": 2
+      },
+      "metric": "function score(output, expected) {\n  const items = output?.output?.items ?? [];\n  return items.length === expected.itemCount ? 1.0 : 0.0;\n}"
+    }
+  ]
+}

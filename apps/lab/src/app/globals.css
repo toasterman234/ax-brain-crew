@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ax-bg: #0a0a0f;
+  --color-ax-surface: #12121a;
+  --color-ax-surface-hover: #1a1a24;
+  --color-ax-border: #1e1e2e;
+  --color-ax-primary: #6c5ce7;
+  --color-ax-primary-dim: #4a3db5;
+  --color-ax-accent: #00cec9;
+  --color-ax-text: #e4e4ec;
+  --color-ax-text-dim: #8888a0;
+  --color-ax-warn: #fdcb6e;
+  --color-ax-error: #e17055;
+  --color-ax-success: #00b894;
+  --color-ax-tool: #0984e3;
+  --color-ax-trace: #6c5ce7;
+}
+
+/* Force mermaid diagrams to render with dark colors regardless of theme */
+svg[id*="mermaid"] .actor {
+  fill: #12121a !important;
+  stroke: #6c5ce7 !important;
+}
+svg[id*="mermaid"] .actor text,
+svg[id*="mermaid"] text.actor {
+  fill: #e4e4ec !important;
+}
+svg[id*="mermaid"] .messageLine0,
+svg[id*="mermaid"] .messageLine1 {
+  stroke: #666680 !important;
+}
+svg[id*="mermaid"] .messageText {
+  fill: #c0c0d0 !important;
+  stroke: none !important;
+}
+svg[id*="mermaid"] .labelBox {
+  fill: #1a1a24 !important;
+  stroke: #4a3db5 !important;
+}
+svg[id*="mermaid"] .labelText {
+  fill: #e4e4ec !important;
+}
+svg[id*="mermaid"] .loopLine {
+  stroke: #4a3db5 !important;
+}
+svg[id*="mermaid"] .loopText {
+  fill: #e4e4ec !important;
+}
+svg[id*="mermaid"] .note {
+  fill: #1a1a24 !important;
+  stroke: #fdcb6e !important;
+}
+svg[id*="mermaid"] .noteText {
+  fill: #e4e4ec !important;
+}
+
+body {
+  background-color: var(--color-ax-bg);
+  color: var(--color-ax-text);
+  font-family: "Inter", system-ui, sans-serif;
+}
