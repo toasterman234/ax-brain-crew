@@ -1,0 +1,27 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Copy everything needed for the crew backend
+COPY package.json package-lock.json tsconfig.json ./
+COPY src/ ./src/
+COPY crew/ ./crew/
+COPY demo-vault/ ./demo-vault/
+
+# Install all deps (tsx, AxLLM, tools)
+RUN npm ci
+
+RUN mkdir -p data
+
+ENV DATABASE_PATH=./data/crew.sqlite
+ENV CREW_DEMO_MODE=true
+ENV OBSIDIAN_VAULT_PATH=./demo-vault
+ENV CREW_SERVE_PORT=8788
+# Model IDs — override in docker-compose
+ENV ROUTER_MODEL=gpt-4.1-mini
+ENV FAST_MODEL=gpt-4.1-mini
+ENV SMART_MODEL=gpt-4.1
+
+EXPOSE 8788
+
+CMD ["npx", "tsx", "src/cli/main.ts", "serve", "--demo"]

@@ -1,0 +1,18 @@
+# Lab runs directly on your machine (Next.js dev server).
+# Only the backend needs Docker — point the lab at it.
+FROM node:22-alpine
+
+WORKDIR /app/apps/lab
+
+# Copy lab
+COPY apps/lab/package.json apps/lab/package-lock.json ./
+RUN npm ci
+
+COPY apps/lab/tsconfig.json apps/lab/next.config.ts apps/lab/postcss.config.mjs apps/lab/next-env.d.ts ./
+COPY apps/lab/src/ ./src/
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+EXPOSE 3020
+
+CMD ["npx", "next", "dev", "--turbopack", "-p", "3020"]

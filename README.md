@@ -1,191 +1,164 @@
-# Ax Brain Crew
+# Ax Brain Crew + Visual Lab
 
-Local-first TypeScript agent crew powered by [AxLLM](https://github.com/ax-llm/ax). Routes natural-language requests to vault-aware specialists (Scribe, Seeker, Sorter) that operate on an Obsidian vault using narrow, safe tools.
+An [AxLLM](https://ax-llm.com) agent runtime with a visual interface for building, testing, and evaluating AI agents.
 
-Connected to the CommandCode proxy at `127.0.0.1:8787/v1`. Provider-agnostic — swap models via env vars.
+**Chat** with agents. **Trace** their decisions. **Build** typed signatures. **Evaluate** against datasets. **Tinker** in a live notebook. All local, all yours.
 
-## Quick Start
+![Architecture](docs/architecture.md)
 
-```bash
-cd ~/ax-brain-crew
-cp .env.example .env
-npm install
-npm run crew -- doctor
-```
-
-All 8 checks should pass (proxy reachability requires the proxy to be running).
-
-## Commands
-
-```bash
-# Have a conversation (remembers context, stays with the last agent)
-npm run crew -- chat
-
-# Run an OpenAI-compatible server so GUI apps (Obsidian Copilot, Open WebUI) can chat with the crew
-npm run crew -- serve
-
-# Submit a one-shot request
-npm run crew -- ask "Save this idea: I want to build a visual interface..."
-
-# Route classification only (no execution)
-npm run crew -- routes "find my notes about AI agents"
-
-# Check environment
-npm run crew -- doctor
-
-# Verify Ax + proxy connectivity
-npm run crew -- smoke-test
-
-# List registered agents
-npm run crew -- agents
-
-# List available tools
-npm run crew -- tools
-
-# Run history
-npm run crew -- history
-npm run crew -- show-run <run-id>
-
-# Chat sessions (each chat = one session of many logged runs)
-npm run crew -- sessions
-npm run crew -- show-session <session-id>
-```
-
-## Chat
-
-`npm run crew -- chat` opens an interactive conversation. It remembers the
-transcript and stays with the last agent (sticky routing) until you switch.
-
-```
-you › save a thought: consolidate my agent infra
-scribe › Saved to Inbox/consolidate-my-agent-infra.md ...
-you › what folder did that go in?          # still talking to scribe, with memory
-you › /seeker what do I know about agents   # switch agent with a /name prefix
-you › /new                                  # start a fresh conversation
-you › /exit                                 # leave (Ctrl+C also works)
-```
-
-In-chat commands: `/help`, `/agents`, `/history`, `/new` (or `/reset`),
-`/exit`. Every turn is logged as a run under the session, so the whole
-conversation stays inspectable with `show-session`.
-
-## GUI clients (Obsidian Copilot, Open WebUI, …)
-
-`npm run crew -- serve` exposes an **OpenAI-compatible** HTTP server so any
-chat app that accepts a custom base URL can talk to the crew (routing, vault
-tools, and all). Default port `8788` (override with `CREW_SERVE_PORT`).
-
-- `GET  /v1/models` — lists `crew` (auto-route) plus one id per agent.
-- `POST /v1/chat/completions` — standard Chat Completions (streaming + non-streaming).
-  The **model id selects the agent**: `crew` lets the classifier route;
-  `seeker` / `scribe` / … forces that specialist. Replies are prefixed
-  `**[agent]**` so you can see who answered. Turns are logged like any run.
-
-### Obsidian Copilot
-
-1. Start the server: `npm run crew -- serve` (leave it running).
-2. In Obsidian, install **Copilot** (Community plugins → browse → "Copilot" by
-   logancyang → Install → Enable). Opening the crew vault (`./vault`) is handy so
-   crew-written notes and Copilot's chat notes live together.
-3. Copilot settings → **Add Model** → Custom Model:
-   - Model name: `crew` (or an agent id like `seeker`)
-   - Provider: **3rd party (openai format)**
-   - Base URL: `http://127.0.0.1:8788/v1`
-   - API key: anything (e.g. `sk-crew`) — the server ignores it
-   - If Copilot reports a CORS error, enable its **CORS** toggle (streaming is
-     lost in that mode; the crew replies in one shot anyway).
-4. Pick the `crew` model in Copilot's chat and go. Copilot saves each chat as a
-   markdown note in your vault, so old conversations are browsable/searchable.
-
-## Explicit Routing
-
-Prefix your request with an agent name to bypass the classifier:
-
-```bash
-npm run crew -- ask "/scribe capture this idea"
-npm run crew -- ask "/seeker what do I know about databases"
-npm run crew -- ask "/sorter organize my inbox"
-```
-
-## Vault Structure
-
-The vault lives at `./vault/` and follows the agent-brain convention:
-
-```
-vault/
-├── AGENTS.md          # Agent operating manual
-├── Inbox/             # Uncategorized captures
-├── Projects/          # Active initiatives
-├── Areas/             # Ongoing responsibilities
-├── Knowledge/         # Reference material
-├── Daily/             # Daily notes
-├── Templates/         # Note templates
-└── raw/               # Immutable sources
-```
-
-## Configuration
-
-All settings in `.env`:
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `OBSIDIAN_VAULT_PATH` | `./vault` | Path to the vault |
-| `PROXY_BASE_URL` | `http://127.0.0.1:8787/v1` | LLM proxy endpoint (CommandCode) |
-| `PROXY_API_KEY` | `user_...` | Proxy auth token |
-| `ROUTER_MODEL` | `deepseek/deepseek-v4-pro` | Model for classification |
-| `FAST_MODEL` | `deepseek/deepseek-v4-pro` | Model for Scribe/Sorter |
-| `SMART_MODEL` | `deepseek/deepseek-v4-pro` | Model for Seeker/synthesis |
-| `DRY_RUN` | `true` | Preview changes without writing |
+---
 
 ## Architecture
 
 ```
-CLI → Router (deterministic + Ax classifier) → Dispatcher → Agent (Ax) → Vault Tools → Markdown files → SQLite log
+┌──────────────────────────────────────────────┐
+│  Ax Visual Lab  (apps/lab/)                  │
+│  Next.js SPA • Chat • Trace • Eval • Builder │
+│  ────────────────────────────────────────────│
+│                    │  REST API               │
+│                    ▼                         │
+│  Crew Runtime  (src/)                        │
+│  Agent routing • Tool factory • 9 flows     │
+│  24 tools • SQLite persistence • Playbooks   │
+│  ────────────────────────────────────────────│
+│                    │                         │
+│                    ▼                         │
+│  AxLLM  (agent / function calling / types)   │
+│  ────────────────────────────────────────────│
+│                    │                         │
+│                    ▼                         │
+│  OpenAI-compatible endpoint  (your key)      │
+└──────────────────────────────────────────────┘
 ```
 
-Eight agents (see `crew/registry.yaml`):
+**Agents** are defined in YAML (metadata + trigger phrases + tool permissions) with Markdown instruction prompts. The runtime engine is AxLLM's `agent()` function — YAML is the settings panel, Ax is the engine. [Add your own agent in 5 minutes →](demo-vault/Adding-Your-Own-Agent.md)
 
-- **Scribe** — captures ideas into structured notes with frontmatter
-- **Seeker** — searches the vault, synthesizes answers with citations
-- **Sorter** — classifies and files notes into proper folders
-- **Architect** — creates project structures, MOCs, and scaffolds new vault areas
-- **Connector** — discovers related notes, suggests links, identifies orphans and themes
-- **Librarian** — audits vault consistency, broken links, stale structures, frontmatter
-- **Conductor** — scopes ambiguous tasks and dispatches to specialists (the only agent that asks clarifying questions)
-- **Scout** — explores local filesystem and GitHub to discover projects and repos
+---
 
-Every run is recorded in `data/crew.sqlite` with routing decisions, tool calls, and changed files.
+## Quick Start
 
-## Testing
+### Option A: Local (recommended for development)
 
 ```bash
-npm test
-# or
-npm run typecheck
+git clone https://github.com/toasterman234/ax-brain-crew.git
+cd ax-brain-crew
+cp .env.example .env
+# Set your LLM endpoint (pick one):
+#   Path A:   OPENAI_API_KEY=sk-...  OPENAI_BASE_URL=https://api.openai.com/v1
+#   Path B:   PROXY_BASE_URL=...     PROXY_API_KEY=...
+npm install
+npm run crew -- serve --demo    # backend on :8788
+npm run dev --prefix apps/lab   # lab on :3020  (in a second terminal)
 ```
 
-## Agent Definitions
+Open `http://localhost:3020` — you're in the Visual Lab.
 
-Agents are defined declaratively in `crew/registry.yaml` with instruction prompts in `crew/agents/*.md`. Add new agents by editing these files — no TypeScript changes required for basic agents.
+### Option B: Docker
 
+```bash
+git clone https://github.com/toasterman234/ax-brain-crew.git
+cd ax-brain-crew
+export OPENAI_API_KEY=sk-your-key-here
+docker-compose up
+```
+
+Open `http://localhost:3020`.
+
+---
+
+## What You Can Do
+
+| Tab | What It Does |
+|-----|-------------|
+| **Chat & Trace** | Talk to agents, see routing decisions, inspect tool calls |
+| **Builder** | Create typed AxLLM signatures (`input -> output`) with a visual editor |
+| **Notebook** | Run JavaScript against the AxLLM runtime — `ax()`, `ai()`, `agent()` pre-loaded |
+| **Eval & Optimize** | Run agents against datasets, measure accuracy, GEPA-optimize signatures |
+| **Components** | Browse agents, tools, flows — shelf for saving artifacts |
+
+---
+
+## Adding Your Own Agent
+
+1. Create `crew/agents/my-agent.md` — the instruction prompt
+2. Add to `crew/registry.yaml` — metadata, tools, trigger phrases
+3. Restart `crew serve`
+
+Full guide: [`demo-vault/Adding-Your-Own-Agent.md`](demo-vault/Adding-Your-Own-Agent.md)
+
+### Example: a code-review agent
+
+**`crew/agents/code-reviewer.md`:**
+```markdown
+# Code Reviewer
+You are a thorough code reviewer. Find bugs, suggest improvements, and
+explain your reasoning.
+```
+
+**`crew/registry.yaml` entry:**
 ```yaml
-agents:
-  my-agent:
-    name: My Agent
-    description: Does something useful
-    instructions: crew/agents/my-agent.md
-    modelTier: fast
-    allowedTools:
-      - vault.read
-      - vault.search
-    triggers:
-      - do my thing
+code-reviewer:
+  name: Code Reviewer
+  description: Reviews code for bugs and improvements
+  instructions: crew/agents/code-reviewer.md
+  modelTier: smart
+  allowedTools: []
+  triggers:
+    - review this code
+    - check my code
+  handoffs:
+    allowedTargets: []
 ```
 
-## Deferred
+That's it. Restart and it appears in the lab. The YAML tells AxLLM "when the user says 'review this code', route to this agent with these instructions." Ax handles the reasoning, structured output, and tool calling.
 
-Roadmap for post-MVP phases: inbox-triage skill; custom agent creation UI; vector search; email/calendar integration; web dashboard.
+---
+
+## Configuration
+
+| Env Var | Required | Description |
+|---------|----------|-------------|
+| `OPENAI_API_KEY` | Yes | Your API key |
+| `OPENAI_BASE_URL` | No | Custom endpoint (default: `https://api.openai.com/v1`) |
+| `ROUTER_MODEL` | No | Model for request classification (default: `gpt-4.1-mini`) |
+| `FAST_MODEL` | No | Model for simple agents (default: `gpt-4.1-mini`) |
+| `SMART_MODEL` | No | Model for complex agents (default: `gpt-4.1`) |
+| `OBSIDIAN_VAULT_PATH` | No | Path to an Obsidian vault (enables vault tools) |
+| `CREW_DEMO_MODE` | No | Set to `true` for clean demo experience |
+
+---
+
+## Project Structure
+
+```
+ax-brain-crew/
+├── apps/lab/            Visual Lab (Next.js SPA)
+├── src/
+│   ├── agents/          Tool factory (AxLLM fn() wrappers)
+│   ├── ai/              Model client + capability detection
+│   ├── cli/             CLI entry points (serve, chat, doctor)
+│   ├── composition/     Orchestrator + coordinator
+│   ├── flows/           9 Ax-native flow() pipelines
+│   ├── observability/   Logger, Langfuse tracing
+│   ├── persistence/     SQLite (sessions, runs, experiments)
+│   ├── playbooks/       Agent learning (persist, seed, edit)
+│   ├── registry/        Agent registry loader (YAML → validated agents)
+│   ├── routing/         Classifier, router, policy enforcer
+│   ├── runtime/         Dispatcher, executor, handoff protocol
+│   ├── tools/           24 tools (vault, web, memory, GitHub, code)
+│   └── config.ts        Configuration from env vars
+├── crew/
+│   ├── agents/          Agent instruction prompts (Markdown)
+│   ├── registry.yaml    Agent definitions (YAML)
+│   └── registry.demo.yaml  Demo agent definitions
+├── demo-vault/          Sample vault for quick start
+├── docs/                Architecture + design docs
+├── tests/               Vitest test suite
+└── docker-compose.yml   One-command Docker setup
+```
+
+---
 
 ## License
 
-Private — Ben Charney
+MIT
